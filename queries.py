@@ -20,7 +20,9 @@ class DataPath():
     self.timeStamp = 20000 # 20 secunde
     self.callUnixTime = {}
     self.sectors = None
-  def fetchFinanceData(self, name=None, sym=None):
+    self.allCompaniesInSector = None
+    self.sectorsMap = {}
+  def fetchFinanceData(self, name=None, sym=None, sector=None):
     if name == "yfinance":
       if self.yfinance == None or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
         self.yfinance = yf.Ticker(sym)
@@ -39,6 +41,13 @@ class DataPath():
         soup = BeautifulSoup(response.text, "html.parser")
         self.sectors = soup
         self.callUnixTime["getSectors"] = current_milli_time()
+    if name == "getCompaniesBySector":
+      url = f'https://www.stockmonitor.com{self.sectorsMap[sector]}'
+      if self.allCompaniesInSector == None or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        self.allCompaniesInSector = soup
+        self.callUnixTime["getCompaniesBySector" + name] = current_milli_time()
   def valueByName(self, name):
     if self.yFinanceExtend == None or not len(self.yFinanceExtend):
       return None
@@ -58,7 +67,18 @@ class DataPath():
       hrefName = sector.find_all("a", {})
       if hrefName != None and len(hrefName) > 0:
         allSectors.append(hrefName[0].string)
+        self.sectorsMap[hrefName[0].string] = hrefName[0]["href"]
     return allSectors
+  def getCompaniesBySector(self, sector):
+    self.getAllSectors()
+    self.fetchFinanceData("getCompaniesBySector", sector=sector)
+    companiesTicker = []
+    localCompanies = self.allCompaniesInSector.find_all("td", {"class": "text-left"})
+    for sector in localCompanies:
+      hrefName = sector.find_all("a", {})
+      if hrefName != None and len(hrefName) == 1:
+        companiesTicker.append(hrefName[0].string)
+    return companiesTicker
   def getTotalRevenueFromSoup(self):
     return self.valueByName('Total Revenue')
   def getEBITDAFromSoup(self):

@@ -26,6 +26,11 @@ def getAllSectors():
   response["sectors"] = dataPath.getAllSectors()
   return response
 
+def getCompaniesInSector(sector):
+  response = {}
+  response['companies'] = dataPath.getCompaniesBySector(sector)
+  return response
+
 def getCompanyExtendedValues(name):
   response = {}
   response["evSales"] = {}
@@ -50,4 +55,5 @@ def getCompanyExtendedValues(name):
 
 #print(getCompanyDataByAbreviation("GOOGL"))
 #print(getCompanyExtendedValues("MLM"))
-print(getAllSectors())
+#print(getAllSectors())
+print(getCompaniesInSector('Basic Materials Sector'))
