@@ -1,5 +1,6 @@
 import queries as qe
 import time
+import csv
 
 dataPath = qe.DataPath()
 
@@ -62,8 +63,21 @@ def getCompanyExtendedValues(name):
   response["pe"]["volume"] = response["evSales"]["volume"]
   return response
 
+def writeToCsv():
+  with open('investing.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    data = getBestCompanies('Utilities Sector')
+    writer.writerow(["Company Name", "Volume", "Market Cap", "Net Dept", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
+    for elements in data:
+      writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["dept"], elements["companyValue"],
+                       elements["totalRevenue"], elements["EBITDA"], elements["netIncomeForCommonStakeholder"], elements['evSales'], elements['vEBITBA'], elements['pe']])
+    # writer.writerow([1, "Linus Torvalds", "Linux Kernel"])
+    # writer.writerow([2, "Tim Berners-Lee", "World Wide Web"])
+    # writer.writerow([3, "Guido van Rossum", "Python Programming"])
+
 #print(getCompanyDataByAbreviation("WBAI"))
 #print(getCompanyExtendedValues("MLM"))
 #print(getAllSectors())
 #print(getCompaniesInSector('Energy Sector'))
+writeToCsv()
 print(getBestCompanies('Utilities Sector'))
