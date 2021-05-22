@@ -54,11 +54,11 @@ class DataPath():
     spanName = self.yFinanceExtend.find_all("span", {"class": "Va(m)"}, text=re.compile(name))
     if not len(spanName):
       return None
-    c_ID = int(spanName[0]["data-reactid"])
+    c_ID = int(float(spanName[0]["data-reactid"]))
     spanValue = self.yFinanceExtend.find_all("span", {"data-reactid": str(c_ID + 3)})
     if not len(spanValue):
       return None
-    return int(spanValue[0].string.replace(",", ""))
+    return int(float(spanValue[0].string.replace(",", "")))
   def getAllSectors(self):
     allSectors = []
     self.fetchFinanceData("getSectors")

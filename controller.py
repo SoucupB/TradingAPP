@@ -36,8 +36,6 @@ def getBestCompanies(sector):
   sectorCompanies = getCompaniesInSector(sector)
   companies = []
   for index in range(5):
-    #print(sectorCompanies['companies'][index])
-    #print(sectorCompanies['companies'][index], getCompanyDataByAbreviation(sectorCompanies['companies'][index]))
     companies.append(getCompanyDataByAbreviation(sectorCompanies['companies'][index]))
     time.sleep(0.9)
   return companies
@@ -68,4 +66,4 @@ def getCompanyExtendedValues(name):
 #print(getCompanyExtendedValues("MLM"))
 #print(getAllSectors())
 #print(getCompaniesInSector('Energy Sector'))
-print(getBestCompanies('Consumer Cyclical Sector'))
+print(getBestCompanies('Utilities Sector'))
