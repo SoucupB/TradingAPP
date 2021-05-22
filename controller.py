@@ -1,4 +1,5 @@
 import queries as qe
+import time
 
 dataPath = qe.DataPath()
 
@@ -31,6 +32,16 @@ def getCompaniesInSector(sector):
   response['companies'] = dataPath.getCompaniesBySector(sector)
   return response
 
+def getBestCompanies(sector):
+  sectorCompanies = getCompaniesInSector(sector)
+  companies = []
+  for index in range(5):
+    #print(sectorCompanies['companies'][index])
+    #print(sectorCompanies['companies'][index], getCompanyDataByAbreviation(sectorCompanies['companies'][index]))
+    companies.append(getCompanyDataByAbreviation(sectorCompanies['companies'][index]))
+    time.sleep(0.9)
+  return companies
+
 def getCompanyExtendedValues(name):
   response = {}
   response["evSales"] = {}
@@ -53,7 +64,8 @@ def getCompanyExtendedValues(name):
   response["pe"]["volume"] = response["evSales"]["volume"]
   return response
 
-#print(getCompanyDataByAbreviation("GOOGL"))
+#print(getCompanyDataByAbreviation("WBAI"))
 #print(getCompanyExtendedValues("MLM"))
 #print(getAllSectors())
-print(getCompaniesInSector('Basic Materials Sector'))
+#print(getCompaniesInSector('Energy Sector'))
+print(getBestCompanies('Consumer Cyclical Sector'))

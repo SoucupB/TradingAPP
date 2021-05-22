@@ -24,30 +24,30 @@ class DataPath():
     self.sectorsMap = {}
   def fetchFinanceData(self, name=None, sym=None, sector=None):
     if name == "yfinance":
-      if self.yfinance == None or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+      if (name + sym not in self.callUnixTime) or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
         self.yfinance = yf.Ticker(sym)
         self.callUnixTime[name + sym] = current_milli_time()
     if name == "yExtendFinance":
       url = f"https://finance.yahoo.com/quote/{sym}/financials?ltr=1"
-      if self.yFinanceExtend == None or(name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+      if (name + sym not in self.callUnixTime) or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         self.yFinanceExtend = soup
         self.callUnixTime[name + sym] = current_milli_time()
     if name == "getSectors":
       url = 'https://www.stockmonitor.com/sectors/'
-      if self.sectors == None or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+      if self.sectors == None or (name in self.callUnixTime and current_milli_time() - self.callUnixTime[name] >= self.timeStamp):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         self.sectors = soup
-        self.callUnixTime["getSectors"] = current_milli_time()
+        self.callUnixTime[name] = current_milli_time()
     if name == "getCompaniesBySector":
       url = f'https://www.stockmonitor.com{self.sectorsMap[sector]}'
-      if self.allCompaniesInSector == None or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+      if (name + sector not in self.callUnixTime) or (name + sector in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sector] >= self.timeStamp):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         self.allCompaniesInSector = soup
-        self.callUnixTime["getCompaniesBySector" + name] = current_milli_time()
+        self.callUnixTime[name + sector] = current_milli_time()
   def valueByName(self, name):
     if self.yFinanceExtend == None or not len(self.yFinanceExtend):
       return None
