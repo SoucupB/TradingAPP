@@ -21,6 +21,11 @@ def getCompanyDataByAbreviation(name):
   response["pe"] = dataPath.getPEBySym(name)
   return response
 
+def getAllSectors():
+  response = {}
+  response["sectors"] = dataPath.getAllSectors()
+  return response
+
 def getCompanyExtendedValues(name):
   response = {}
   response["evSales"] = {}
@@ -43,5 +48,6 @@ def getCompanyExtendedValues(name):
   response["pe"]["volume"] = response["evSales"]["volume"]
   return response
 
-#print(getCompanyDataByAbreviation("MLM"))
-print(getCompanyExtendedValues("MLM"))
+#print(getCompanyDataByAbreviation("GOOGL"))
+#print(getCompanyExtendedValues("MLM"))
+print(getAllSectors())

@@ -19,7 +19,8 @@ class DataPath():
     self.yFinanceExtend = None
     self.timeStamp = 20000 # 20 secunde
     self.callUnixTime = {}
-  def fetchFinanceData(self, name, sym):
+    self.sectors = None
+  def fetchFinanceData(self, name=None, sym=None):
     if name == "yfinance":
       if self.yfinance == None or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
         self.yfinance = yf.Ticker(sym)
@@ -30,6 +31,14 @@ class DataPath():
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         self.yFinanceExtend = soup
+        self.callUnixTime[name + sym] = current_milli_time()
+    if name == "getSectors":
+      url = 'https://www.stockmonitor.com/sectors/'
+      if self.sectors == None or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        self.sectors = soup
+        self.callUnixTime["getSectors"] = current_milli_time()
   def valueByName(self, name):
     if self.yFinanceExtend == None or not len(self.yFinanceExtend):
       return None
@@ -41,6 +50,15 @@ class DataPath():
     if not len(spanValue):
       return None
     return int(spanValue[0].string.replace(",", ""))
+  def getAllSectors(self):
+    allSectors = []
+    self.fetchFinanceData("getSectors")
+    localSectors = self.sectors.find_all("td", {"class": "text-left", "style": "width: auto;"})
+    for sector in localSectors:
+      hrefName = sector.find_all("a", {})
+      if hrefName != None and len(hrefName) > 0:
+        allSectors.append(hrefName[0].string)
+    return allSectors
   def getTotalRevenueFromSoup(self):
     return self.valueByName('Total Revenue')
   def getEBITDAFromSoup(self):
