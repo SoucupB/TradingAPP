@@ -17,7 +17,7 @@ class DataPath():
   def __init__(self):
     self.yfinance = None
     self.yFinanceExtend = None
-    self.timeStamp = 20000 # 20 secunde
+    self.timeStamp = 40000 # 20 secunde
     self.callUnixTime = {}
     self.sectors = None
     self.allCompaniesInSector = None
