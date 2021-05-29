@@ -48,16 +48,16 @@ class S(BaseHTTPRequestHandler):
         self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
 
 def run(server_class=HTTPServer, handler_class=S, port=8080):
-    logging.basicConfig(level=logging.INFO)
-    server_address = ('', port)
-    httpd = server_class(server_address, handler_class)
-    logging.info('Starting httpd...\n')
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
-    logging.info('Stopping httpd...\n')
+  logging.basicConfig(level=logging.INFO)
+  server_address = ('', port)
+  httpd = server_class(server_address, handler_class)
+  logging.info('Starting httpd...\n')
+  try:
+      httpd.serve_forever()
+  except KeyboardInterrupt:
+      pass
+  httpd.server_close()
+  logging.info('Stopping httpd...\n')
 
 if __name__ == '__main__':
     from sys import argv

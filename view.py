@@ -2,41 +2,55 @@ import tkinter as tk
 from pandastable import Table, TableModel
 import time
 import csv
+import requests
+import json
+import aiohttp
+import asyncio
+import subprocess
 
 filepath = 'investing.csv'
 root = tk.Tk()
 root.geometry('1280x680+10+10')
 root.title('Investing Startegies')
+e1 = tk.Entry(root)
+e1.pack(padx=550, pady=20)
+variable = tk.StringVar(root)
+variable.set("EV/Sales")
+w = tk.OptionMenu(root, variable, "EV/Sales", "EV/EBITDA", "P/E")
+w.pack()
 
-def mue():
-  print("DFSFDSFS")
-
-B = tk.Button(root, text ="Hello", command = mue)
-
-def writeToCsv(data):
-  with open('investing.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(["Company Name", "Volume", "Market Cap", "Net Dept", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
-    for elements in data:
-      writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["dept"], elements["companyValue"],
-                       elements["totalRevenue"], elements["EBITDA"], elements["netIncomeForCommonStakeholder"], elements['evSales'], elements['vEBITBA'], elements['pe']])
+def daa():
+  print("DFSFDSFS", e1.get())
 
 class TestApp(tk.Frame):
-    def __init__(self, parent, filepath):
-      super().__init__(parent)
-      self.index = 0
-      self.table = Table(self, showtoolbar=False, showstatusbar=False)
-      self.table.importCSV(filepath)
-      self.table.show()
-
-    def timer(self):
+  def __init__(self, parent, filepath):
+    super().__init__(parent)
+    self.index = 0
+    self.table = Table(self, showtoolbar = False, showstatusbar = False)
+    self.table.importCSV(filepath)
+    self.table.show()
+    self.poll = True
+    self.stre = "Consumer%20Defensive%20Sector"
+    self.B = tk.Button(parent, text ="Hello", command = daa)
+    self.B.pack()
+  def startQuery(self, stre):
+    if self.poll == True:
+      self.proc = subprocess.Popen(f'python dbUpdater.py args {stre}')
+      self.poll = self.proc.poll()
+    return
+  def timer(self):
+    if self.poll != None:
       self.table.importCSV(filepath)
       self.table.update()
-      self.index += 1
-      self.after(3000, self.timer)
+      self.poll = True
+      self.startQuery(self.stre)
+    self.poll = self.proc.poll()
+    self.after(3000, self.timer)
 
 app = TestApp(root, filepath)
-app.timer()
+root.after(1000, app.timer)
 app.pack(fill=tk.BOTH, expand=1)
-B.pack()
 root.mainloop()
+
+
+

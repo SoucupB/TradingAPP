@@ -17,7 +17,7 @@ class DataPath():
   def __init__(self):
     self.yfinance = None
     self.yFinanceExtend = None
-    self.timeStamp = 40000 # 20 secunde
+    self.timeStamp = 5000 # 5 secunde
     self.callUnixTime = {}
     self.sectors = None
     self.allCompaniesInSector = None
@@ -30,6 +30,7 @@ class DataPath():
     if name == "yExtendFinance":
       url = f"https://finance.yahoo.com/quote/{sym}/financials?ltr=1"
       if (name + sym not in self.callUnixTime) or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+        time.sleep(0.3)
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         self.yFinanceExtend = soup

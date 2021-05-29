@@ -28,6 +28,10 @@ def getAllSectors():
   response["sectors"] = dataPath.getAllSectors()
   return response
 
+def getCompanySector():
+  response = {}
+  return response
+
 def getCompaniesInSector(sector):
   response = {}
   response['companies'] = dataPath.getCompaniesBySector(sector)
@@ -38,7 +42,7 @@ def getBestCompanies(sector):
   companies = []
   for index in range(5):
     companies.append(getCompanyDataByAbreviation(sectorCompanies['companies'][index]))
-    time.sleep(0.9)
+    time.sleep(2.5)
   return companies
 
 def getCompanyExtendedValues(name):
@@ -63,29 +67,7 @@ def getCompanyExtendedValues(name):
   response["pe"]["volume"] = response["evSales"]["volume"]
   return response
 
-def getMaterialShow():
-  return 'Basic Materials Sector'
-
-def writeSectors():
-  sectors = getAllSectors()
-  with open('config.dbe', 'w') as fd:
-    fd.write(str(len(sectors["sectors"])) + '\n')
-    for sector in sectors["sectors"]:
-      fd.write(sector + '\n')
-
-def writeToCsv():
-  data = getBestCompanies(getMaterialShow())
-  with open('investing.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(["Company Name", "Volume", "Market Cap", "Net Dept", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
-    for elements in data:
-      writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["dept"], elements["companyValue"],
-                       elements["totalRevenue"], elements["EBITDA"], elements["netIncomeForCommonStakeholder"], elements['evSales'], elements['vEBITBA'], elements['pe']])
-
-#print(getCompanyDataByAbreviation("WBAI"))
+#print(getCompanyDataByAbreviation("AAPL"))
 #print(getCompanyExtendedValues("MLM"))
 #print(getAllSectors())
-#print(getCompaniesInSector('Energy Sector'))
-#writeToCsv()
-# start()
-# loop()
+#print(getBestCompanies('Industrials Sector'))
