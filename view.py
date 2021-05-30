@@ -19,9 +19,6 @@ variable.set("EV/Sales")
 w = tk.OptionMenu(root, variable, "EV/Sales", "EV/EBITDA", "P/E")
 w.pack()
 
-def daa():
-  print("DFSFDSFS", e1.get())
-
 class TestApp(tk.Frame):
   def __init__(self, parent, filepath):
     super().__init__(parent)
@@ -31,11 +28,13 @@ class TestApp(tk.Frame):
     self.table.show()
     self.poll = True
     self.stre = "Consumer%20Defensive%20Sector"
-    self.B = tk.Button(parent, text ="Hello", command = daa)
+    self.B = tk.Button(parent, text ="Hello", command = self.daa)
     self.B.pack()
+  def daa(self):
+    print("DFSFDSFS", e1.get())
   def startQuery(self, stre):
     if self.poll == True:
-      self.proc = subprocess.Popen(f'python dbUpdater.py args {stre}')
+      self.proc = subprocess.Popen(f'python dbUpdater.py companies {stre}')
       self.poll = self.proc.poll()
     return
   def timer(self):
@@ -48,7 +47,7 @@ class TestApp(tk.Frame):
     self.after(3000, self.timer)
 
 app = TestApp(root, filepath)
-root.after(1000, app.timer)
+#root.after(1000, app.timer)
 app.pack(fill=tk.BOTH, expand=1)
 root.mainloop()
 

@@ -92,6 +92,12 @@ class DataPath():
     if 'longName' in financeInfo and financeInfo['longName'] != None:
       return financeInfo['longName']
     return UNDEF_VALUE
+  def getSectorBySym(self, sym):
+    self.fetchFinanceData("yfinance", sym)
+    financeInfo = self.yfinance.info
+    if 'sector' in financeInfo and financeInfo['sector'] != None:
+      return financeInfo['sector'] + " Sector"
+    return UNDEF_VALUE
   def getVolumeBySym(self, sym):
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info

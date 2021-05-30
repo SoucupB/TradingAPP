@@ -12,6 +12,7 @@ def getCompanyDataByAbreviation(name):
   response["name"] = dataPath.getNameBySym(name)
   response["volume"] = dataPath.getVolumeBySym(name)
   response["price"] = dataPath.getPriceBySym(name)
+  response["sector"] = dataPath.getSectorBySym(name)
   response["totalRevenue"] = dataPath.getTotalRevenueBySym(name)
   response["dept"] = dataPath.getDeptBySym(name)
   response["netIncomeForCommonStakeholder"] = dataPath.getNetIncomeCommonStockBySym(name)

@@ -14,7 +14,7 @@ def writeToCsv(data):
       writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["dept"], elements["companyValue"],
                        elements["totalRevenue"], elements["EBITDA"], elements["netIncomeForCommonStakeholder"], elements['evSales'], elements['vEBITBA'], elements['pe']])
     for index in range(3):
-      writer.writerow([[""]] * 11)
+      writer.writerow([])
 
 def getSectors():
   testsite_array = []
@@ -25,8 +25,13 @@ def getSectors():
 
 argument_lists = sys.argv
 print(argument_lists)
-if argument_lists[1] == "args":
+if argument_lists[1] == "companies":
   r = requests.get(f'http://localhost:8080/companies/{argument_lists[2]}')
+  print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
+  writeToCsv(json.loads(r.text))
+
+if argument_lists[1] == "company":
+  r = requests.get(f'http://localhost:8080/company/{argument_lists[2]}')
   print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
   writeToCsv(json.loads(r.text))
 

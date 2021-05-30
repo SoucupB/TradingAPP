@@ -35,7 +35,12 @@ class S(BaseHTTPRequestHandler):
           companies = json.dumps(getBestCompanies(sector))
           self.wfile.write(companies.encode('utf-8'))
           return
-
+        params = checkParam('/company/:cmp', self.path)
+        if params:
+          sector = params[":cmp"].replace("%20", " ")
+          companies = json.dumps(getCompanyDataByAbreviation(sector))
+          self.wfile.write(companies.encode('utf-8'))
+          return
         self.wfile.write(json.dumps({"Error": "Wrong endpoint!"}).encode('utf-8'))
         return
 
