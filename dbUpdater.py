@@ -6,7 +6,7 @@ import requests
 import json
 from datetime import datetime
 import sys
-def writeToCsv(data):
+def writeToCsvArray(data):
   with open('investing.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["Company Name", "Volume", "Market Cap", "Net Dept", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
@@ -15,6 +15,29 @@ def writeToCsv(data):
                        elements["totalRevenue"], elements["EBITDA"], elements["netIncomeForCommonStakeholder"], elements['evSales'], elements['vEBITBA'], elements['pe']])
     for index in range(3):
       writer.writerow([])
+
+def writeToCsvElement(data):
+  with open('investing.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(["Company Name", "Volume", "Market Cap", "Net Dept", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
+    elements = data
+    writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["dept"], elements["companyValue"],
+                      elements["totalRevenue"], elements["EBITDA"], elements["netIncomeForCommonStakeholder"], elements['evSales'], elements['vEBITBA'], elements['pe']])
+    for index in range(3):
+      writer.writerow([])
+
+def writeJsonDataArray(data):
+  with open('investing.json', 'w', newline='') as file:
+    response = []
+    for elements in data:
+      response.append(elements)
+    y = json.dumps(str(response))
+    file.write(y)
+
+def writeJsonData(data):
+  with open('investing.json', 'w', newline='') as file:
+    y = json.dumps(data, indent=4)
+    file.write(y)
 
 def getSectors():
   testsite_array = []
@@ -28,10 +51,11 @@ print(argument_lists)
 if argument_lists[1] == "companies":
   r = requests.get(f'http://localhost:8080/companies/{argument_lists[2]}')
   print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
-  writeToCsv(json.loads(r.text))
+  #writeToCsvArray(json.loads(r.text))
 
 if argument_lists[1] == "company":
   r = requests.get(f'http://localhost:8080/company/{argument_lists[2]}')
   print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
-  writeToCsv(json.loads(r.text))
+  #writeToCsvElement(json.loads(r.text))
+  writeJsonData(json.loads(r.text))
 
