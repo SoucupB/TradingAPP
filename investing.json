@@ -1,15 +1,15 @@
 {
-  "name": "Apple Inc.",
-  "volume": 71311109,
-  "price": 124.61,
-  "sector": "Technology Sector",
-  "totalRevenue": 325406000,
+  "name": "Walmart Inc.",
+  "volume": 7063303,
+  "price": 142.03,
+  "sector": "Consumer Defensive Sector",
+  "totalRevenue": 562839000,
   "dept": -1,
-  "netIncomeForCommonStakeholder": 76311000,
-  "EBITDA": 103184000,
-  "marketCap": 8886077292.49,
+  "netIncomeForCommonStakeholder": 12250000,
+  "EBITDA": 32323000,
+  "marketCap": 1003200925.09,
   "companyValue": -1,
   "evSales": -1,
   "vEBITBA": -1,
-  "pe": 116.44556214032053
+  "pe": 81.89395306857143
 }

@@ -20,8 +20,22 @@ variable.set("EV/Sales")
 w = tk.OptionMenu(root, variable, "EV/Sales", "EV/EBITDA", "P/E")
 w.pack()
 
-class TestApp(tk.Frame):
+rowNames = {
+  "name": "Company Name",
+  "volume": "Volume",
+  "marketCap": "Market Cap",
+  "totalRevenue": "Total Revenue",
+  "dept": "Net Dept",
+  "totalRevenue": "Total Revenue",
+  "netIncomeForCommonStakeholder": "Net Income Common Stockholders",
+  "evSales": "EV/Sales",
+  "vEBITBA": "V/EBITBA",
+  "pe": "P/E",
+  "price": "Prvious Close",
+  "companyValue": "Company Value"
+}
 
+class TestApp(tk.Frame):
   def jsonToCsv(self, data, csvName):
     parsedData = data
     with open(csvName, 'w', newline='') as file:
@@ -30,18 +44,21 @@ class TestApp(tk.Frame):
       if isinstance(data, list):
         parsedData = data[0]
       for key, value in parsedData.items():
-        keys.append(key)
+        if key in rowNames:
+          keys.append(rowNames[key])
       writer.writerow(keys)
       if isinstance(data, list):
-        values = []
         for each in data:
-          for _, value in parsedData.items():
-            values.append(value)
+          values = []
+          for key, value in each.items():
+            if key in rowNames:
+              values.append(value)
           writer.writerow(values)
       else:
         values = []
-        for _, value in parsedData.items():
-          values.append(value)
+        for key, value in parsedData.items():
+          if key in rowNames:
+            values.append(value)
         writer.writerow(values)
         writer.writerow([""] * len(keys))
   def readJson(self, jsonData):
@@ -63,6 +80,9 @@ class TestApp(tk.Frame):
     self.progress = ttk.Progressbar(parent, orient = tk.HORIZONTAL,
               length = 100, mode = 'determinate')
     self.progress.pack(pady = 10)
+    self.progressMulti = ttk.Progressbar(parent, orient = tk.HORIZONTAL,
+              length = 100, mode = 'determinate')
+    self.progressMulti.pack(pady = 10)
     self.lastUsedVariable = None
   def searchCompany(self):
     self.procIndiv = subprocess.Popen(f'python dbUpdater.py company {e1.get()} investing.json')
@@ -72,20 +92,27 @@ class TestApp(tk.Frame):
   def searchBatch(self, stre):
     self.procMulti = subprocess.Popen(f'python dbUpdater.py companies {stre} troliu.json')
     self.pollMulti = self.procMulti.poll()
-  def getRandomInterval(self, lastNumber, threshhold):
-    newValue = lastNumber + random.randint(5, 25)
+  def getRandomInterval(self, lastNumber, threshhold, left, right):
+    newValue = lastNumber + random.randint(left, right)
     if newValue < threshhold:
       return newValue
     return lastNumber
-  def timerMulti(self, batch):
+  def timerMulti(self):
     if self.pollMulti != None:
-      self.searchBatch(batch)
+      self.progressMulti['value'] = 100
+      self.update_idletasks()
+      time.sleep(1.0)
+      jsonReponse = self.readJson("troliu.json")
+      self.jsonToCsv(jsonReponse, "cmps.csv")
       self.table.importCSV(filepath)
       self.table.update()
+      self.progressMulti['value'] = 0
+      self.update_idletasks()
       return
     else:
       self.pollMulti = self.procMulti.poll()
-      self.after(1000, self.timerMulti)
+      self.progressMulti['value'] = self.getRandomInterval(self.progressMulti['value'], 95, 1, 5)
+      self.after(random.randint(200, 800), self.timerMulti)
   def timerIndividual(self):
     if self.pollIndividual != None:
       self.progress['value'] = 100
@@ -97,9 +124,10 @@ class TestApp(tk.Frame):
       self.table.update()
       self.progress['value'] = 0
       self.update_idletasks()
-      self.timerMulti(jsonReponse["sector"].replace(" ", "%20"))
+      self.searchBatch(jsonReponse["sector"].replace(" ", "%20"))
+      self.timerMulti()
     else:
-      self.progress['value'] = self.getRandomInterval(self.progress['value'], 95)
+      self.progress['value'] = self.getRandomInterval(self.progress['value'], 95, 5, 25)
       self.update_idletasks()
       self.pollIndividual = self.procIndiv.poll()
       self.after(random.randint(200, 800), self.timerIndividual)
