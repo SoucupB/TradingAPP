@@ -26,18 +26,20 @@ def writeToCsvElement(data):
     for index in range(3):
       writer.writerow([])
 
-def writeJsonDataArray(data):
-  with open('investing.json', 'w', newline='') as file:
+def writeJsonDataArray(data, jsonFile):
+  with open(jsonFile, 'w', newline='') as file:
     response = []
     for elements in data:
       response.append(elements)
-    y = json.dumps(str(response))
+    y = json.dumps(response, indent = 2)
     file.write(y)
+  print("Saving multi to", jsonFile)
 
-def writeJsonData(data):
-  with open('investing.json', 'w', newline='') as file:
-    y = json.dumps(data, indent=4)
+def writeJsonData(data, jsonFile):
+  with open(jsonFile, 'w', newline='') as file:
+    y = json.dumps(data, indent = 2)
     file.write(y)
+  print("Saving to indiv to", jsonFile)
 
 def getSectors():
   testsite_array = []
@@ -52,10 +54,11 @@ if argument_lists[1] == "companies":
   r = requests.get(f'http://localhost:8080/companies/{argument_lists[2]}')
   print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
   #writeToCsvArray(json.loads(r.text))
+  writeJsonDataArray(json.loads(r.text), argument_lists[3])
 
 if argument_lists[1] == "company":
   r = requests.get(f'http://localhost:8080/company/{argument_lists[2]}')
   print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
   #writeToCsvElement(json.loads(r.text))
-  writeJsonData(json.loads(r.text))
+  writeJsonData(json.loads(r.text), argument_lists[3])
 
