@@ -8,8 +8,9 @@ import aiohttp
 import asyncio
 import subprocess
 import random
+import copy
 from tkinter import ttk
-filepath = 'investing.csv'
+filepath = 'temp/investing.csv'
 root = tk.Tk()
 root.geometry('1280x680+10+10')
 root.title('Investing Startegies')
@@ -61,11 +62,21 @@ class TestApp(tk.Frame):
             values.append(value)
         writer.writerow(values)
         writer.writerow([""] * len(keys))
+        writer.writerow([""] * len(keys))
+        writer.writerow([""] * len(keys))
   def readJson(self, jsonData):
     result = {}
     with open(jsonData, 'r+', newline='') as file:
       result = json.loads(file.read().replace("\n", " "))
     return result
+  def combine_files(self, first, second, target):
+    nmd = ""
+    with open(first, 'r+', newline='') as file:
+      nmd += file.read()
+    with open(second, 'r+', newline='') as file:
+      nmd += file.read()
+    with open(target, 'w+', newline='') as file:
+      file.write(nmd)
   def __init__(self, parent, filepath):
     super().__init__(parent)
     self.index = 0
@@ -85,13 +96,21 @@ class TestApp(tk.Frame):
     self.progressMulti.pack(pady = 10)
     self.lastUsedVariable = None
   def searchCompany(self):
-    self.procIndiv = subprocess.Popen(f'python dbUpdater.py company {e1.get()} investing.json')
+    self.procIndiv = subprocess.Popen(f'python dbUpdater.py company {e1.get()} temp/investing.json')
     self.pollIndividual = self.procIndiv.poll()
     self.timerIndividual()
     self.lastUsedVariable = e1.get()
   def searchBatch(self, stre):
-    self.procMulti = subprocess.Popen(f'python dbUpdater.py companies {stre} troliu.json')
+    self.procMulti = subprocess.Popen(f'python dbUpdater.py companies {stre} temp/multiData.json')
     self.pollMulti = self.procMulti.poll()
+  def getMedianBy(self, companies, by, currentCompany):
+    records = []
+    for i in range(len(companies)):
+      records.append(companies[i][by])
+    records.sort()
+    currentCompanyCopy = copy.deepcopy(currentCompany)
+    currentCompanyCopy[by] = records[len(records) // 2]
+    return currentCompanyCopy
   def getRandomInterval(self, lastNumber, threshhold, left, right):
     newValue = lastNumber + random.randint(left, right)
     if newValue < threshhold:
@@ -102,12 +121,14 @@ class TestApp(tk.Frame):
       self.progressMulti['value'] = 100
       self.update_idletasks()
       time.sleep(1.0)
-      jsonReponse = self.readJson("troliu.json")
-      self.jsonToCsv(jsonReponse, "cmps.csv")
-      self.table.importCSV(filepath)
-      self.table.update()
+      jsonReponse = self.readJson("temp/multiData.json")
+      print(self.getMedianBy(jsonReponse, "pe", self.singleton))
+      self.jsonToCsv(jsonReponse, "temp/cmps.csv")
       self.progressMulti['value'] = 0
       self.update_idletasks()
+      self.combine_files("temp/investing.csv", "temp/cmps.csv", "temp/res.csv")
+      self.table.importCSV("temp/res.csv")
+      self.table.update()
       return
     else:
       self.pollMulti = self.procMulti.poll()
@@ -118,8 +139,9 @@ class TestApp(tk.Frame):
       self.progress['value'] = 100
       self.update_idletasks()
       time.sleep(1.0)
-      jsonReponse = self.readJson("investing.json")
-      self.jsonToCsv(jsonReponse, "investing.csv")
+      jsonReponse = self.readJson("temp/investing.json")
+      self.singleton = jsonReponse
+      self.jsonToCsv(jsonReponse, "temp/investing.csv")
       self.table.importCSV(filepath)
       self.table.update()
       self.progress['value'] = 0

@@ -53,12 +53,10 @@ print(argument_lists)
 if argument_lists[1] == "companies":
   r = requests.get(f'http://localhost:8080/companies/{argument_lists[2]}')
   print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
-  #writeToCsvArray(json.loads(r.text))
   writeJsonDataArray(json.loads(r.text), argument_lists[3])
 
 if argument_lists[1] == "company":
   r = requests.get(f'http://localhost:8080/company/{argument_lists[2]}')
   print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
-  #writeToCsvElement(json.loads(r.text))
   writeJsonData(json.loads(r.text), argument_lists[3])
 
