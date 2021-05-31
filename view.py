@@ -33,11 +33,12 @@ rowNames = {
   "vEBITBA": "V/EBITBA",
   "pe": "P/E",
   "price": "Prvious Close",
-  "companyValue": "Company Value"
+  "companyValue": "Company Value",
+  "targetPrice": "Pret tinta"
 }
 
 class TestApp(tk.Frame):
-  def jsonToCsv(self, data, csvName):
+  def jsonToCsv(self, data, csvName, maxRows, spaces):
     parsedData = data
     with open(csvName, 'w', newline='') as file:
       writer = csv.writer(file)
@@ -47,6 +48,9 @@ class TestApp(tk.Frame):
       for key, value in parsedData.items():
         if key in rowNames:
           keys.append(rowNames[key])
+      fxy = len(keys)
+      for index in range(fxy, self.maxRows):
+        keys.append(" ")
       writer.writerow(keys)
       if isinstance(data, list):
         for each in data:
@@ -61,8 +65,7 @@ class TestApp(tk.Frame):
           if key in rowNames:
             values.append(value)
         writer.writerow(values)
-        writer.writerow([""] * len(keys))
-        writer.writerow([""] * len(keys))
+      for i in range(spaces):
         writer.writerow([""] * len(keys))
   def readJson(self, jsonData):
     result = {}
@@ -85,7 +88,7 @@ class TestApp(tk.Frame):
     self.table.show()
     self.pollIndividual = True
     self.pollMulti = True
-    self.stre = "Consumer%20Defensive%20Sector"
+    self.maxRows = 15
     self.check = tk.Button(parent, text ="Search", command = self.searchCompany)
     self.check.pack()
     self.progress = ttk.Progressbar(parent, orient = tk.HORIZONTAL,
@@ -111,6 +114,32 @@ class TestApp(tk.Frame):
     currentCompanyCopy = copy.deepcopy(currentCompany)
     currentCompanyCopy[by] = records[len(records) // 2]
     return currentCompanyCopy
+  def changeRules(self, by, allCompanies, company):
+    cCompany = None
+    if by == "pe":
+      cCompany = self.getMedianBy(allCompanies, by, company)
+      cCompany["companyValue"] = cCompany["totalRevenue"] * cCompany[by]
+      cCompany["marketCap"] = cCompany["marketCap"] - cCompany["dept"]
+      cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
+    if by == "vEBITBA":
+      cCompany = self.getMedianBy(allCompanies, by, company)
+      cCompany["companyValue"] = cCompany["EBITDA"] * cCompany[by]
+      cCompany["marketCap"] = cCompany["marketCap"] - cCompany["dept"]
+      cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
+    if by == "evSales":
+      cCompany = self.getMedianBy(allCompanies, by, company)
+      cCompany["companyValue"] = cCompany["EBITDA"] * cCompany[by]
+      cCompany["marketCap"] = cCompany["marketCap"] - cCompany["dept"]
+      cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
+    return cCompany
+
+  def createTargetCompany(self, allCompanies, company):
+    response = []
+    response.append(self.changeRules("pe", allCompanies, company))
+    response.append(self.changeRules("vEBITBA", allCompanies, company))
+    response.append(self.changeRules("evSales", allCompanies, company))
+    self.jsonToCsv(response, "temp/targetCompany.csv", self.maxRows, 2)
+
   def getRandomInterval(self, lastNumber, threshhold, left, right):
     newValue = lastNumber + random.randint(left, right)
     if newValue < threshhold:
@@ -122,11 +151,12 @@ class TestApp(tk.Frame):
       self.update_idletasks()
       time.sleep(1.0)
       jsonReponse = self.readJson("temp/multiData.json")
-      print(self.getMedianBy(jsonReponse, "pe", self.singleton))
-      self.jsonToCsv(jsonReponse, "temp/cmps.csv")
+      self.createTargetCompany(jsonReponse, self.singleton)
+      self.jsonToCsv(jsonReponse, "temp/cmps.csv", self.maxRows, 2)
       self.progressMulti['value'] = 0
       self.update_idletasks()
       self.combine_files("temp/investing.csv", "temp/cmps.csv", "temp/res.csv")
+      self.combine_files("temp/res.csv", "temp/targetCompany.csv", "temp/res.csv")
       self.table.importCSV("temp/res.csv")
       self.table.update()
       return
@@ -141,7 +171,7 @@ class TestApp(tk.Frame):
       time.sleep(1.0)
       jsonReponse = self.readJson("temp/investing.json")
       self.singleton = jsonReponse
-      self.jsonToCsv(jsonReponse, "temp/investing.csv")
+      self.jsonToCsv(jsonReponse, "temp/investing.csv", self.maxRows, 2)
       self.table.importCSV(filepath)
       self.table.update()
       self.progress['value'] = 0
