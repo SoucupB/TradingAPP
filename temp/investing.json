@@ -4,12 +4,12 @@
   "price": 2411.56,
   "sector": "Communication Services Sector",
   "totalRevenue": 196682000,
-  "dept": -1,
+  "dept": 483497,
   "netIncomeForCommonStakeholder": 51363000,
   "EBITDA": 75140000,
   "marketCap": 2906851015.92,
-  "companyValue": -1,
-  "evSales": -1,
-  "vEBITBA": -1,
+  "companyValue": 2907529131.92,
+  "evSales": 14.78233286177688,
+  "vEBITBA": 38.68649550066542,
   "pe": 56.59426076981485
 }

@@ -175,6 +175,7 @@ class TestApp(tk.Frame):
       "Values": self.recomandations(newCompany["targetPrice"] / newCompany["price"] - 1, self.lastRandament),
       "Randament": " "
     })
+    print(newCompany["targetPrice"] / newCompany["price"] - 1, self.lastRandament, newCompany["targetPrice"] / newCompany["price"] - 1 - self.lastRandament)
     self.lastRandament = newCompany["targetPrice"] / newCompany["price"] - 1
     self.jsonToCsv(response, "temp/Corn.csv", self.maxRows, headerStructure, 2)
     return response
@@ -279,7 +280,7 @@ class TestApp(tk.Frame):
       jsonReponse = self.readJson("temp/investing.json")
       self.singleton = jsonReponse
       self.jsonToCsv(jsonReponse, "temp/investing.csv", self.maxRows, rowNames, 2)
-      self.table.importCSV(filepath)
+      #self.table.importCSV(filepath)
       self.table.update()
       self.progress['value'] = 0
       self.update_idletasks()

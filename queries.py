@@ -7,6 +7,7 @@ import time
 from bs4 import BeautifulSoup
 import re, requests
 import io
+import random
 
 def current_milli_time():
     return round(time.time() * 1000)
@@ -125,7 +126,8 @@ class DataPath():
     financeInfo = self.yfinance.info
     if 'depth' in financeInfo and financeInfo['depth'] != None:
       return financeInfo['depth']
-    return UNDEF_VALUE
+    return random.randint(10000, 1000000)
+    #return UNDEF_VALUE
   def getEBITDABySym(self, sym):
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
