@@ -9,6 +9,8 @@ import asyncio
 import subprocess
 import random
 import copy
+import time
+from datetime import datetime
 from tkinter import ttk
 filepath = 'temp/investing.csv'
 root = tk.Tk()
@@ -61,7 +63,8 @@ averageMedian = {
 headerStructure = {
   "Types": "Types",
   "Values": "Values",
-  "Randament": "Randament"
+  "Randament": "Randament",
+  "Last Update": "Last Update"
 }
 
 class TestApp(tk.Frame):
@@ -116,12 +119,16 @@ class TestApp(tk.Frame):
       self.table.importCSV(filepath)
     except:
       print("No rew table is present!")
+    self.timebetweenSearch = 10
+    self.startTime = time.time()
     self.table.show()
     self.pollIndividual = True
     self.pollMulti = True
     self.maxRows = 15
     self.check = tk.Button(parent, text ="Search", command = self.searchCompany)
+    self.automat = tk.Button(parent, text ="Start", command = self.startCoroutine)
     self.check.pack()
+    self.automat.pack()
     self.progress = ttk.Progressbar(parent, orient = tk.HORIZONTAL,
               length = 100, mode = 'determinate')
     self.progress.pack(pady = 10)
@@ -130,8 +137,20 @@ class TestApp(tk.Frame):
     self.progressMulti.pack(pady = 10)
     self.lastUsedVariable = None
     self.lastRandament = None
+    self.transition = False
+  def startCoroutine(self):
+    if not self.transition:
+      if time.time() >= self.startTime:
+        self.transition = True
+        self.procIndiv = subprocess.Popen(f'python dbUpdater.py company {self.lastUsedVariable} temp/investing.json')
+        self.pollIndividual = self.procIndiv.poll()
+        self.timerIndividual()
+    self.after(self.timebetweenSearch * 1000, self.startCoroutine)
+
   def searchCompany(self):
+    self.transition = True
     self.procIndiv = subprocess.Popen(f'python dbUpdater.py company {e1.get()} temp/investing.json')
+    self.searchedValue = e1.get()
     self.pollIndividual = self.procIndiv.poll()
     self.timerIndividual()
     self.lastUsedVariable = e1.get()
@@ -163,17 +182,20 @@ class TestApp(tk.Frame):
     response.append({
       "Types": "Previous Close",
       "Values": newCompany["price"],
-      "Randament": newCompany["targetPrice"] / newCompany["price"] - 1
+      "Randament": newCompany["targetPrice"] / newCompany["price"] - 1,
+      "Last Update": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     })
     response.append({
       "Types": "Pret Tinta",
       "Values": newCompany["targetPrice"],
-      "Randament": " "
+      "Randament": " ",
+      "Last Update": " "
     })
     response.append({
       "Types": "Recomandare",
       "Values": self.recomandations(newCompany["targetPrice"] / newCompany["price"] - 1, self.lastRandament),
-      "Randament": " "
+      "Randament": " ",
+      "Last Update": " ",
     })
     print(newCompany["targetPrice"] / newCompany["price"] - 1, self.lastRandament, newCompany["targetPrice"] / newCompany["price"] - 1 - self.lastRandament)
     self.lastRandament = newCompany["targetPrice"] / newCompany["price"] - 1
@@ -267,6 +289,8 @@ class TestApp(tk.Frame):
       self.combineDataIntoOnetable(["temp/Corn.csv", "temp/cmps.csv", "temp/medianObj.csv", "temp/targetCompany.csv"])
       self.table.importCSV("temp/res.csv")
       self.table.update()
+      self.transition = False
+      self.startTime = time.time() + self.timebetweenSearch
       return
     else:
       self.pollMulti = self.procMulti.poll()
