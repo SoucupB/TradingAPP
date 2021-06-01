@@ -129,6 +129,7 @@ class TestApp(tk.Frame):
               length = 100, mode = 'determinate')
     self.progressMulti.pack(pady = 10)
     self.lastUsedVariable = None
+    self.lastRandament = None
   def searchCompany(self):
     self.procIndiv = subprocess.Popen(f'python dbUpdater.py company {e1.get()} temp/investing.json')
     self.pollIndividual = self.procIndiv.poll()
@@ -137,26 +138,45 @@ class TestApp(tk.Frame):
   def searchBatch(self, stre):
     self.procMulti = subprocess.Popen(f'python dbUpdater.py companies {stre} temp/multiData.json')
     self.pollMulti = self.procMulti.poll()
-  def getApplicationHeader(self, priceCategory, company, allCompanies):
+
+  def recomandations(self, randament, lastRandament):
+    if 0.85 * abs(lastRandament) >= abs(randament):
+      return "SELL"
+    if 0.85 * abs(lastRandament) < abs(randament) and 1.15 * abs(lastRandament) > abs(randament):
+      return "HOLD"
+    if 1.15 * abs(lastRandament) < abs(randament) and 1.3 * abs(lastRandament) > abs(randament):
+      return "BUY"
+    if 1.3 * abs(lastRandament) < abs(randament):
+      return "STRONG BUY"
+    return "INCONCLUSIVE"
+  def getApplicationHeader(self, company, allCompanies):
     response = []
+    priceCategory = variable.get()
     if priceCategory == "P/E":
       newCompany = self.changeRules("pe", allCompanies, company)
-      response.append({
-        "Types": "Previous Close",
-        "Values": newCompany["price"],
-        "Randament": newCompany["targetPrice"] / newCompany["price"] - 1
-      })
-      response.append({
-        "Types": "Pret Tinta",
-        "Values": newCompany["targetPrice"],
-        "Randament": " "
-      })
-      response.append({
-        "Types": "Recomandare",
-        "Values": "SELL",
-        "Randament": " "
-      })
-      self.jsonToCsv(response, "temp/Corn.csv", self.maxRows, headerStructure, 2)
+    if priceCategory == "EV/Sales":
+      newCompany = self.changeRules("evSales", allCompanies, company)
+    if priceCategory == "EV/EBITDA":
+      newCompany = self.changeRules("vEBITBA", allCompanies, company)
+    if self.lastRandament == None:
+      self.lastRandament = newCompany["targetPrice"] / newCompany["price"] - 1
+    response.append({
+      "Types": "Previous Close",
+      "Values": newCompany["price"],
+      "Randament": newCompany["targetPrice"] / newCompany["price"] - 1
+    })
+    response.append({
+      "Types": "Pret Tinta",
+      "Values": newCompany["targetPrice"],
+      "Randament": " "
+    })
+    response.append({
+      "Types": "Recomandare",
+      "Values": self.recomandations(newCompany["targetPrice"] / newCompany["price"] - 1, self.lastRandament),
+      "Randament": " "
+    })
+    self.lastRandament = newCompany["targetPrice"] / newCompany["price"] - 1
+    self.jsonToCsv(response, "temp/Corn.csv", self.maxRows, headerStructure, 2)
     return response
   def getMedianValue(self, companies, by):
     records = []
@@ -179,17 +199,17 @@ class TestApp(tk.Frame):
     if by == "pe":
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["totalRevenue"] * cCompany[by]
-      cCompany["marketCap"] = cCompany["marketCap"] - cCompany["dept"]
+      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["dept"]
       cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
     if by == "vEBITBA":
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["EBITDA"] * cCompany[by]
-      cCompany["marketCap"] = cCompany["marketCap"] - cCompany["dept"]
+      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["dept"]
       cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
     if by == "evSales":
       cCompany = self.getMedianBy(allCompanies, by, company)
-      cCompany["companyValue"] = cCompany["EBITDA"] * cCompany[by]
-      cCompany["marketCap"] = cCompany["marketCap"] - cCompany["dept"]
+      cCompany["companyValue"] = cCompany["netIncomeForCommonStakeholder"] * cCompany[by]
+      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["dept"]
       cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
     return cCompany
 
@@ -239,7 +259,7 @@ class TestApp(tk.Frame):
       self.createTargetCompany(jsonReponse, self.singleton)
       self.jsonToCsv(jsonReponse, "temp/cmps.csv", self.maxRows, rowNames, 2)
       self.createMedianAndAverageTable(jsonReponse)
-      self.getApplicationHeader("P/E", self.singleton, jsonReponse)
+      self.getApplicationHeader(self.singleton, jsonReponse)
 
       self.progressMulti['value'] = 0
       self.update_idletasks()
