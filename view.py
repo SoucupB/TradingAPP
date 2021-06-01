@@ -58,6 +58,12 @@ averageMedian = {
   "Types": "Types"
 }
 
+headerStructure = {
+  "Types": "Types",
+  "Values": "Values",
+  "Randament": "Randament"
+}
+
 class TestApp(tk.Frame):
   def jsonToCsv(self, data, csvName, maxRows, rowNames, spaces):
     parsedData = data
@@ -131,6 +137,27 @@ class TestApp(tk.Frame):
   def searchBatch(self, stre):
     self.procMulti = subprocess.Popen(f'python dbUpdater.py companies {stre} temp/multiData.json')
     self.pollMulti = self.procMulti.poll()
+  def getApplicationHeader(self, priceCategory, company, allCompanies):
+    response = []
+    if priceCategory == "P/E":
+      newCompany = self.changeRules("pe", allCompanies, company)
+      response.append({
+        "Types": "Previous Close",
+        "Values": newCompany["price"],
+        "Randament": newCompany["targetPrice"] / newCompany["price"] - 1
+      })
+      response.append({
+        "Types": "Pret Tinta",
+        "Values": newCompany["targetPrice"],
+        "Randament": " "
+      })
+      response.append({
+        "Types": "Recomandare",
+        "Values": "SELL",
+        "Randament": " "
+      })
+      self.jsonToCsv(response, "temp/Corn.csv", self.maxRows, headerStructure, 2)
+    return response
   def getMedianValue(self, companies, by):
     records = []
     for i in range(len(companies)):
@@ -212,10 +239,11 @@ class TestApp(tk.Frame):
       self.createTargetCompany(jsonReponse, self.singleton)
       self.jsonToCsv(jsonReponse, "temp/cmps.csv", self.maxRows, rowNames, 2)
       self.createMedianAndAverageTable(jsonReponse)
+      self.getApplicationHeader("P/E", self.singleton, jsonReponse)
 
       self.progressMulti['value'] = 0
       self.update_idletasks()
-      self.combineDataIntoOnetable(["temp/investing.csv", "temp/cmps.csv", "temp/medianObj.csv", "temp/targetCompany.csv"])
+      self.combineDataIntoOnetable(["temp/Corn.csv", "temp/cmps.csv", "temp/medianObj.csv", "temp/targetCompany.csv"])
       self.table.importCSV("temp/res.csv")
       self.table.update()
       return
