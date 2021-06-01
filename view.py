@@ -37,8 +37,29 @@ rowNames = {
   "targetPrice": "Pret tinta"
 }
 
+rowTargetCompany = {
+  "volume": "Volume",
+  "marketCap": "Market Cap",
+  "totalRevenue": "Total Revenue",
+  "dept": "Net Dept",
+  "totalRevenue": "Total Revenue",
+  "netIncomeForCommonStakeholder": "Net Income Common Stockholders",
+  "evSales": "EV/Sales",
+  "vEBITBA": "V/EBITBA",
+  "pe": "P/E",
+  "price": "Prvious Close",
+  "companyValue": "Company Value",
+  "targetPrice": "Pret tinta"
+}
+
+averageMedian = {
+  "Median": "Median",
+  "Average": "Average",
+  "Types": "Types"
+}
+
 class TestApp(tk.Frame):
-  def jsonToCsv(self, data, csvName, maxRows, spaces):
+  def jsonToCsv(self, data, csvName, maxRows, rowNames, spaces):
     parsedData = data
     with open(csvName, 'w', newline='') as file:
       writer = csv.writer(file)
@@ -76,15 +97,19 @@ class TestApp(tk.Frame):
     nmd = ""
     with open(first, 'r+', newline='') as file:
       nmd += file.read()
-    with open(second, 'r+', newline='') as file:
-      nmd += file.read()
+    if second != None:
+      with open(second, 'r+', newline='') as file:
+        nmd += file.read()
     with open(target, 'w+', newline='') as file:
       file.write(nmd)
   def __init__(self, parent, filepath):
     super().__init__(parent)
     self.index = 0
     self.table = Table(self, showtoolbar = False, showstatusbar = False)
-    self.table.importCSV(filepath)
+    try:
+      self.table.importCSV(filepath)
+    except:
+      print("No rew table is present!")
     self.table.show()
     self.pollIndividual = True
     self.pollMulti = True
@@ -106,13 +131,21 @@ class TestApp(tk.Frame):
   def searchBatch(self, stre):
     self.procMulti = subprocess.Popen(f'python dbUpdater.py companies {stre} temp/multiData.json')
     self.pollMulti = self.procMulti.poll()
-  def getMedianBy(self, companies, by, currentCompany):
+  def getMedianValue(self, companies, by):
     records = []
     for i in range(len(companies)):
       records.append(companies[i][by])
     records.sort()
+    return records[len(records) // 2]
+  def getAverageValue(self, companies, by):
+    total = 0
+    for i in range(len(companies)):
+      total += companies[i][by]
+    return total / len(companies)
+  def getMedianBy(self, companies, by, currentCompany):
+    medianValue = self.getMedianValue(companies, by)
     currentCompanyCopy = copy.deepcopy(currentCompany)
-    currentCompanyCopy[by] = records[len(records) // 2]
+    currentCompanyCopy[by] = medianValue
     return currentCompanyCopy
   def changeRules(self, by, allCompanies, company):
     cCompany = None
@@ -138,7 +171,31 @@ class TestApp(tk.Frame):
     response.append(self.changeRules("pe", allCompanies, company))
     response.append(self.changeRules("vEBITBA", allCompanies, company))
     response.append(self.changeRules("evSales", allCompanies, company))
-    self.jsonToCsv(response, "temp/targetCompany.csv", self.maxRows, 2)
+    self.jsonToCsv(response, "temp/targetCompany.csv", self.maxRows, rowTargetCompany, 2)
+
+  def combineDataIntoOnetable(self, tables):
+    self.combine_files(tables[0], None, "temp/res.csv")
+    for i in range(1, len(tables)):
+      self.combine_files("temp/res.csv", tables[i], "temp/res.csv")
+
+  def createMedianAndAverageTable(self, allCompanies):
+    response = []
+    response.append({
+      "Types": "EV/Sales",
+      "Median": self.getMedianValue(allCompanies, "pe"),
+      "Average": self.getAverageValue(allCompanies, "pe")
+    })
+    response.append({
+      "Types": "V/EBITBA",
+      "Median": self.getMedianValue(allCompanies, "vEBITBA"),
+      "Average": self.getAverageValue(allCompanies, "vEBITBA")
+    })
+    response.append({
+      "Types": "P/E",
+      "Median": self.getMedianValue(allCompanies, "evSales"),
+      "Average": self.getAverageValue(allCompanies, "evSales")
+    })
+    self.jsonToCsv(response, "temp/medianObj.csv", self.maxRows, averageMedian, 2)
 
   def getRandomInterval(self, lastNumber, threshhold, left, right):
     newValue = lastNumber + random.randint(left, right)
@@ -150,13 +207,15 @@ class TestApp(tk.Frame):
       self.progressMulti['value'] = 100
       self.update_idletasks()
       time.sleep(1.0)
+
       jsonReponse = self.readJson("temp/multiData.json")
       self.createTargetCompany(jsonReponse, self.singleton)
-      self.jsonToCsv(jsonReponse, "temp/cmps.csv", self.maxRows, 2)
+      self.jsonToCsv(jsonReponse, "temp/cmps.csv", self.maxRows, rowNames, 2)
+      self.createMedianAndAverageTable(jsonReponse)
+
       self.progressMulti['value'] = 0
       self.update_idletasks()
-      self.combine_files("temp/investing.csv", "temp/cmps.csv", "temp/res.csv")
-      self.combine_files("temp/res.csv", "temp/targetCompany.csv", "temp/res.csv")
+      self.combineDataIntoOnetable(["temp/investing.csv", "temp/cmps.csv", "temp/medianObj.csv", "temp/targetCompany.csv"])
       self.table.importCSV("temp/res.csv")
       self.table.update()
       return
@@ -171,7 +230,7 @@ class TestApp(tk.Frame):
       time.sleep(1.0)
       jsonReponse = self.readJson("temp/investing.json")
       self.singleton = jsonReponse
-      self.jsonToCsv(jsonReponse, "temp/investing.csv", self.maxRows, 2)
+      self.jsonToCsv(jsonReponse, "temp/investing.csv", self.maxRows, rowNames, 2)
       self.table.importCSV(filepath)
       self.table.update()
       self.progress['value'] = 0
