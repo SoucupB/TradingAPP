@@ -17,18 +17,18 @@ root = tk.Tk()
 root.geometry('1280x680+10+10')
 root.title('Investing Startegies')
 e1 = tk.Entry(root)
-e1.pack(padx=550, pady=20)
+e1.pack(pady = (10, 10))
 variable = tk.StringVar(root)
 variable.set("EV/Sales")
 w = tk.OptionMenu(root, variable, "EV/Sales", "EV/EBITDA", "P/E")
-w.pack()
+w.pack(pady = (0, 10))
 
 rowNames = {
   "name": "Company Name",
   "volume": "Volume",
   "marketCap": "Market Cap",
   "totalRevenue": "Total Revenue",
-  "dept": "Net Dept",
+  "debt": "Net debt",
   "totalRevenue": "Total Revenue",
   "netIncomeForCommonStakeholder": "Net Income Common Stockholders",
   "evSales": "EV/Sales",
@@ -43,7 +43,7 @@ rowTargetCompany = {
   "volume": "Volume",
   "marketCap": "Market Cap",
   "totalRevenue": "Total Revenue",
-  "dept": "Net Dept",
+  "debt": "Net debt",
   "totalRevenue": "Total Revenue",
   "netIncomeForCommonStakeholder": "Net Income Common Stockholders",
   "evSales": "EV/Sales",
@@ -127,14 +127,20 @@ class TestApp(tk.Frame):
     self.maxRows = 15
     self.check = tk.Button(parent, text ="Search", command = self.searchCompany)
     self.automat = tk.Button(parent, text ="Start", command = self.startCoroutine)
-    self.check.pack()
-    self.automat.pack()
+    self.check.pack(pady = (0, 10))
+    #self.check.place(x=10, y=10, in_=parent)
+    self.check.config(height = 1, width = 20)
+    self.automat.pack(pady = (0, 10))
+    #self.automat.place(x=10, y=40, in_=parent)
+    self.automat.config(height = 1, width = 20)
     self.progress = ttk.Progressbar(parent, orient = tk.HORIZONTAL,
               length = 100, mode = 'determinate')
-    self.progress.pack(pady = 10)
+    #self.progress.config(height = 1, width = 20)
+    self.progress.pack(pady = (0, 10))
     self.progressMulti = ttk.Progressbar(parent, orient = tk.HORIZONTAL,
               length = 100, mode = 'determinate')
-    self.progressMulti.pack(pady = 10)
+    self.progressMulti.pack(pady = (0, 10))
+    #self.progressMulti.place(x=10, y=70, in_=parent)
     self.lastUsedVariable = None
     self.lastRandament = None
     self.transition = False
@@ -222,17 +228,17 @@ class TestApp(tk.Frame):
     if by == "pe":
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["totalRevenue"] * cCompany[by]
-      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["dept"]
+      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["debt"]
       cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
     if by == "vEBITBA":
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["EBITDA"] * cCompany[by]
-      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["dept"]
+      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["debt"]
       cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
     if by == "evSales":
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["netIncomeForCommonStakeholder"] * cCompany[by]
-      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["dept"]
+      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["debt"]
       cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
     return cCompany
 

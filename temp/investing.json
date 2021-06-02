@@ -1,15 +1,15 @@
 {
   "name": "Alphabet Inc.",
-  "volume": 218285,
-  "price": 2425.82,
+  "volume": 553355,
+  "price": 2417.87,
   "sector": "Communication Services Sector",
   "totalRevenue": 196682000,
-  "dept": 873247,
+  "debt": 358088,
   "netIncomeForCommonStakeholder": 51363000,
   "EBITDA": 75140000,
-  "marketCap": 529520118.70000005,
-  "companyValue": 530504584.70000005,
-  "evSales": 2.6947885708910833,
-  "vEBITBA": 7.058102977109397,
-  "pe": 10.309368975721824
+  "marketCap": 1337940453.85,
+  "companyValue": 1338386861.85,
+  "evSales": 6.805717065364395,
+  "vEBITBA": 17.81517696100612,
+  "pe": 26.04872094406479
 }

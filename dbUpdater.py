@@ -9,9 +9,9 @@ import sys
 def writeToCsvArray(data):
   with open('investing.csv', 'w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(["Company Name", "Volume", "Market Cap", "Net Dept", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
+    writer.writerow(["Company Name", "Volume", "Market Cap", "Net Debt", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
     for elements in data:
-      writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["dept"], elements["companyValue"],
+      writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["debt"], elements["companyValue"],
                        elements["totalRevenue"], elements["EBITDA"], elements["netIncomeForCommonStakeholder"], elements['evSales'], elements['vEBITBA'], elements['pe']])
     for index in range(3):
       writer.writerow([])
@@ -19,9 +19,9 @@ def writeToCsvArray(data):
 def writeToCsvElement(data):
   with open('investing.csv', 'w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(["Company Name", "Volume", "Market Cap", "Net Dept", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
+    writer.writerow(["Company Name", "Volume", "Market Cap", "Net Debt", "Company Value", "Total Revenue", "EBITDA", "Net Income Common Stockholders", "EV/Sales", "V/EBITBA", "P/E"])
     elements = data
-    writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["dept"], elements["companyValue"],
+    writer.writerow([elements["name"], elements["volume"], elements["marketCap"], elements["debt"], elements["companyValue"],
                       elements["totalRevenue"], elements["EBITDA"], elements["netIncomeForCommonStakeholder"], elements['evSales'], elements['vEBITBA'], elements['pe']])
     for index in range(3):
       writer.writerow([])

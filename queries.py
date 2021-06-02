@@ -121,11 +121,11 @@ class DataPath():
     if sales != None:
       return sales
     return UNDEF_VALUE
-  def getDeptBySym(self, sym):
+  def getDebtBySym(self, sym):
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
-    if 'depth' in financeInfo and financeInfo['depth'] != None:
-      return financeInfo['depth']
+    if 'debt' in financeInfo and financeInfo['debt'] != None:
+      return financeInfo['debt']
     return random.randint(10000, 1000000)
     #return UNDEF_VALUE
   def getEBITDABySym(self, sym):
@@ -156,10 +156,10 @@ class DataPath():
     return price * volume
   def getCompanyValueBySym(self, sym):
     marketCap = self.getMarketCapBySim(sym)
-    dept = self.getDeptBySym(sym)
-    if marketCap == UNDEF_VALUE or dept == UNDEF_VALUE:
+    debt = self.getDebtBySym(sym)
+    if marketCap == UNDEF_VALUE or debt == UNDEF_VALUE:
       return UNDEF_VALUE
-    return marketCap + dept
+    return marketCap + debt
   def getEvSalesBySym(self, sym):
     companyValue = self.getCompanyValueBySym(sym)
     totalRevenue = self.getTotalRevenueBySym(sym)

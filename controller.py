@@ -14,7 +14,7 @@ def getCompanyDataByAbreviation(name):
   response["price"] = dataPath.getPriceBySym(name)
   response["sector"] = dataPath.getSectorBySym(name)
   response["totalRevenue"] = dataPath.getTotalRevenueBySym(name)
-  response["dept"] = dataPath.getDeptBySym(name)
+  response["debt"] = dataPath.getDebtBySym(name)
   response["netIncomeForCommonStakeholder"] = dataPath.getNetIncomeCommonStockBySym(name)
   response["EBITDA"] = dataPath.getEBITDABySym(name)
   response["marketCap"] = dataPath.getMarketCapBySim(name)
@@ -52,19 +52,19 @@ def getCompanyExtendedValues(name):
   response["evSales"]["netIncomeForCommonStakeholder"] = dataPath.getNetIncomeCommonStockBySym(name)
   response["evSales"]["totalRevenue"] = dataPath.getTotalRevenueBySym(name)
   response["evSales"]["EBITDA"] = dataPath.getEBITDABySym(name)
-  response["evSales"]["dept"] = dataPath.getDeptBySym(name)
+  response["evSales"]["debt"] = dataPath.getDebtBySym(name)
   response["evSales"]["volume"] = dataPath.getVolumeBySym(name)
   response["evEBITDA"] = {}
   response["evEBITDA"]["netIncomeForCommonStakeholder"] = response["evSales"]["netIncomeForCommonStakeholder"]
   response["evEBITDA"]["totalRevenue"] = response["evSales"]["totalRevenue"]
   response["evEBITDA"]["EBITDA"] = response["evSales"]["EBITDA"]
-  response["evEBITDA"]["dept"] = response["evSales"]["dept"]
+  response["evEBITDA"]["debt"] = response["evSales"]["debt"]
   response["evEBITDA"]["volume"] = response["evSales"]["volume"]
   response["pe"] = {}
   response["pe"]["netIncomeForCommonStakeholder"] = response["evSales"]["netIncomeForCommonStakeholder"]
   response["pe"]["totalRevenue"] = response["evSales"]["totalRevenue"]
   response["pe"]["EBITDA"] = response["evSales"]["EBITDA"]
-  response["pe"]["dept"] = response["evSales"]["dept"]
+  response["pe"]["debt"] = response["evSales"]["debt"]
   response["pe"]["volume"] = response["evSales"]["volume"]
   return response
 
