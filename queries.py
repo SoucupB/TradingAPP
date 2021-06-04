@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 import re, requests
 import io
 import random
+import json
+from urllib.request import urlopen as uReq
 
 def current_milli_time():
     return round(time.time() * 1000)
@@ -18,7 +20,7 @@ class DataPath():
   def __init__(self):
     self.yfinance = None
     self.yFinanceExtend = None
-    self.timeStamp = 5000 # 5 secunde
+    self.timeStamp = 70000 # 5 secunde
     self.callUnixTime = {}
     self.sectors = None
     self.allCompaniesInSector = None
@@ -50,6 +52,20 @@ class DataPath():
         soup = BeautifulSoup(response.text, "html.parser")
         self.allCompaniesInSector = soup
         self.callUnixTime[name + sector] = current_milli_time()
+    if name == "wsj":
+      url = f'https://www.wsj.com/market-data/quotes/{sym}/financials'
+      if (name + sym not in self.callUnixTime) or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        self.resp = soup
+        self.callUnixTime[name + sym] = current_milli_time()
+    if name == 'rapid':
+      url = f'https://api.polygon.io/v2/reference/financials/{sym}?limit=1&apiKey=sMCn6GfWpIJkhAyw2utieD11XxA5ctwy'
+      if (name + sym not in self.callUnixTime) or (name + sym in self.callUnixTime and current_milli_time() - self.callUnixTime[name + sym] >= self.timeStamp):
+        response = json.loads(requests.get(url).text)
+        self.response = response
+        self.callUnixTime[name + sym] = current_milli_time()
+
   def valueByName(self, name):
     if self.yFinanceExtend == None or not len(self.yFinanceExtend):
       return None
@@ -76,11 +92,34 @@ class DataPath():
     self.fetchFinanceData("getCompaniesBySector", sector=sector)
     companiesTicker = []
     localCompanies = self.allCompaniesInSector.find_all("td", {"class": "text-left"})
+    # allTrs = self.allCompaniesInSector.find_all("tbody", {})
+    # for eachTrs in allTrs:
+    #   comps = eachTrs.find_all("tr", {})
+    #   for eachData in comps:
+    #     print(eachData)
+    #     exit()
     for sector in localCompanies:
       hrefName = sector.find_all("a", {})
       if hrefName != None and len(hrefName) == 1:
         companiesTicker.append(hrefName[0].string)
     return companiesTicker
+  # def getCompaniesBySectorV2(self, sector):
+  #   self.getAllSectors()
+  #   self.fetchFinanceData("getCompaniesBySector", sector=sector)
+  #   companiesTicker = []
+  #   localCompanies = self.allCompaniesInSector.find_all("td", {"class": "text-left"})
+  #   allTrs = self.allCompaniesInSector.find_all("tbody", {})
+  #   for eachTrs in allTrs:
+  #     comps = eachTrs.find_all("tr", {})
+  #     for eachData in comps:
+  #       eachTrs.find_all("td", {})
+  #       print(eachTrs[0])
+  #       exit()
+  #   for sector in localCompanies:
+  #     hrefName = sector.find_all("a", {})
+  #     if hrefName != None and len(hrefName) == 1:
+  #       companiesTicker.append(hrefName[0].string)
+  #   return companiesTicker
   def getTotalRevenueFromSoup(self):
     return self.valueByName('Total Revenue')
   def getEBITDAFromSoup(self):
@@ -100,18 +139,27 @@ class DataPath():
       return financeInfo['sector'] + " Sector"
     return UNDEF_VALUE
   def getVolumeBySym(self, sym):
+    self.fetchFinanceData("rapid", sym=sym)
+    if len(self.response["results"]) and "shares" in self.response["results"][0]:
+      return self.response["results"][0]["shares"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'volume' in financeInfo and financeInfo['volume'] != None:
       return financeInfo['volume']
     return UNDEF_VALUE
   def getPriceBySym(self, sym):
+    self.fetchFinanceData("rapid", sym=sym)
+    if len(self.response["results"]) and "sharePriceAdjustedClose" in self.response["results"][0]:
+      return self.response["results"][0]["sharePriceAdjustedClose"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'regularMarketPrice' in financeInfo and financeInfo['regularMarketPrice'] != None:
       return financeInfo['regularMarketPrice']
     return UNDEF_VALUE
   def getTotalRevenueBySym(self, sym):
+    self.fetchFinanceData("rapid", sym=sym)
+    if len(self.response["results"]) and "priceSales" in self.response["results"][0]:
+      return self.response["results"][0]["priceSales"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'sales' in financeInfo and financeInfo['sales'] != None:
@@ -121,14 +169,40 @@ class DataPath():
     if sales != None:
       return sales
     return UNDEF_VALUE
+
+  def getDebtByWsj(self):
+    fields = self.wsjCompany.find_all("td", {})
+    for field in fields:
+      currentTableRow = field.find_all("span", {})
+      isCorrect = False
+      objects = []
+      for cTable in currentTableRow:
+        if "Total Debt to EBITDA" in cTable:
+          isCorrect = True
+        objects.append(cTable)
+      if isCorrect:
+        secondRec = objects[1].find_all("span", {})
+        for obj in secondRec:
+          return obj.string
+    return UNDEF_VALUE
+
   def getDebtBySym(self, sym):
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'debt' in financeInfo and financeInfo['debt'] != None:
       return financeInfo['debt']
-    return random.randint(10000, 1000000)
-    #return UNDEF_VALUE
+    #self.fetchFinanceData("wsj", sym=sym)
+    # value = self.getDebtByWsj()
+    # if value != UNDEF_VALUE:
+    #   return float(value) * self.getEBITDABySym(sym)
+    self.fetchFinanceData("rapid", sym=sym)
+    if len(self.response["results"]) and "debt" in self.response["results"][0]:
+      return self.response["results"][0]["debt"]
+    return UNDEF_VALUE
   def getEBITDABySym(self, sym):
+    self.fetchFinanceData("rapid", sym=sym)
+    if len(self.response["results"]) and "enterpriseValueOverEBITDA" in self.response["results"][0]:
+      return self.response["results"][0]["enterpriseValueOverEBITDA"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'EBITDA' in financeInfo and financeInfo['EBITDA'] != None:
@@ -139,6 +213,9 @@ class DataPath():
       return EBITDA
     return UNDEF_VALUE
   def getNetIncomeCommonStockBySym(self, sym):
+    self.fetchFinanceData("rapid", sym=sym)
+    if len(self.response["results"]) and "netIncomeCommonStock" in self.response["results"][0]:
+      return self.response["results"][0]["netIncomeCommonStock"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'Income' in financeInfo and financeInfo['Income'] != None:

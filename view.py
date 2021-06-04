@@ -114,7 +114,7 @@ class TestApp(tk.Frame):
   def __init__(self, parent, filepath):
     super().__init__(parent)
     self.index = 0
-    self.table = Table(self, showtoolbar = False, showstatusbar = False)
+    self.table = Table(self, showtoolbar = True, showstatusbar = False)
     try:
       self.table.importCSV(filepath)
     except:
@@ -126,7 +126,7 @@ class TestApp(tk.Frame):
     self.pollMulti = True
     self.maxRows = 15
     self.check = tk.Button(parent, text ="Search", command = self.searchCompany)
-    self.automat = tk.Button(parent, text ="Start", command = self.startCoroutine)
+    self.automat = tk.Button(parent, text ="Auto Update", command = self.startCoroutine)
     self.check.pack(pady = (0, 10))
     #self.check.place(x=10, y=10, in_=parent)
     self.check.config(height = 1, width = 20)
@@ -165,15 +165,13 @@ class TestApp(tk.Frame):
     self.pollMulti = self.procMulti.poll()
 
   def recomandations(self, randament, lastRandament):
-    if 0.85 * abs(lastRandament) >= abs(randament):
+    if randament < -0.15:
       return "SELL"
-    if 0.85 * abs(lastRandament) < abs(randament) and 1.15 * abs(lastRandament) > abs(randament):
+    if randament > -0.15 and randament <= 0.15:
       return "HOLD"
-    if 1.15 * abs(lastRandament) < abs(randament) and 1.3 * abs(lastRandament) > abs(randament):
+    if randament > 0.15 and randament <= 0.3:
       return "BUY"
-    if 1.3 * abs(lastRandament) < abs(randament):
-      return "STRONG BUY"
-    return "INCONCLUSIVE"
+    return "STRONG BUY"
   def getApplicationHeader(self, company, allCompanies):
     response = []
     priceCategory = variable.get()
@@ -227,9 +225,9 @@ class TestApp(tk.Frame):
     cCompany = None
     if by == "pe":
       cCompany = self.getMedianBy(allCompanies, by, company)
-      cCompany["companyValue"] = cCompany["totalRevenue"] * cCompany[by]
-      cCompany["marketCap"] = cCompany["companyValue"] - cCompany["debt"]
-      cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
+      cCompany["companyValue"] = cCompany["netIncomeForCommonStakeholder"] * cCompany[by]
+      cCompany["marketCap"] = cCompany["companyValue"] + cCompany["debt"]
+      cCompany["targetPrice"] = cCompany["volume"] / cCompany["companyValue"]
     if by == "vEBITBA":
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["EBITDA"] * cCompany[by]
@@ -237,7 +235,7 @@ class TestApp(tk.Frame):
       cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
     if by == "evSales":
       cCompany = self.getMedianBy(allCompanies, by, company)
-      cCompany["companyValue"] = cCompany["netIncomeForCommonStakeholder"] * cCompany[by]
+      cCompany["companyValue"] = cCompany["totalRevenue"] * cCompany[by]
       cCompany["marketCap"] = cCompany["companyValue"] - cCompany["debt"]
       cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
     return cCompany
