@@ -204,9 +204,6 @@ class DataPath():
     # if value != UNDEF_VALUE:
     #   return float(value) * self.getEBITDABySym(sym)
   def getEBITDABySym(self, sym):
-    self.fetchFinanceData("rapid", sym=sym)
-    if len(self.response["results"]) > 0 and "enterpriseValueOverEBITDA" in self.response["results"][0]:
-      return self.response["results"][0]["enterpriseValueOverEBITDA"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'EBITDA' in financeInfo and financeInfo['EBITDA'] != None:
@@ -215,6 +212,9 @@ class DataPath():
     EBITDA = self.getEBITDAFromSoup()
     if EBITDA != None:
       return EBITDA
+    self.fetchFinanceData("rapid", sym=sym)
+    if len(self.response["results"]) > 0 and "enterpriseValueOverEBITDA" in self.response["results"][0]:
+      return self.response["results"][0]["enterpriseValueOverEBITDA"]
     return UNDEF_VALUE
   def getNetIncomeCommonStockBySym(self, sym):
     self.fetchFinanceData("rapid", sym=sym)

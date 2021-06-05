@@ -12,6 +12,9 @@ import copy
 import time
 from datetime import datetime
 from tkinter import ttk
+import locale
+locale.setlocale(locale.LC_ALL, '')
+
 filepath = 'temp/investing.csv'
 root = tk.Tk()
 root.geometry('1280x680+10+10')
@@ -35,7 +38,8 @@ rowNames = {
   "pe": "P/E",
   "price": "Previous Close",
   "companyValue": "Company Value",
-  "targetPrice": "Pret tinta"
+  "targetPrice": "Pret tinta",
+  "EBITDA": "EBITDA"
 }
 
 rowNamesIndex = {
@@ -50,7 +54,7 @@ rowNamesIndex = {
   "pe": 11,
   "price": 1,
   "companyValue": 5,
-  "targetPrice": 13
+  "EBITDA": 7
 }
 
 rowTargetCompany = {
@@ -58,15 +62,29 @@ rowTargetCompany = {
   "marketCap": "Market Cap",
   "totalRevenue": "Total Revenue",
   "debt": "Net debt",
-  "totalRevenue": "Total Revenue",
   "netIncomeForCommonStakeholder": "Net Income Common Stockholders",
   "evSales": "EV/Sales",
   "vEBITBA": "V/EBITBA",
   "pe": "P/E",
-  "price": "Previous Close",
+  "EBITDA": "EBITDA",
   "companyValue": "Company Value",
   "targetPrice": "Pret tinta",
   "name": "Company Name"
+}
+
+rowTargetCompanyIndex = {
+  "volume": 2,
+  "totalRevenue": 6,
+  "marketCap": 3,
+  "debt": 4,
+  "netIncomeForCommonStakeholder": 8,
+  "evSales": 9,
+  "vEBITBA": 10,
+  "pe": 11,
+  "companyValue": 5,
+  "targetPrice": 1,
+  "EBITDA": 7,
+  "name": 0
 }
 
 averageMedian = {
@@ -82,18 +100,40 @@ headerStructure = {
   "Last Update": "Last Update"
 }
 
+def isfloat(value):
+  try:
+    float(value)
+    return True
+  except ValueError:
+    return False
+
+def isInt(value):
+  try:
+    int(value)
+    return True
+  except ValueError:
+    return False
+
+def toCommas(value):
+  return f'{value:n}'
+
 class TestApp(tk.Frame):
   def jsonToCsv(self, data, csvName, maxRows, rowNames, spaces, rowNamesIndex=None):
     parsedData = data
     with open(csvName, 'w', newline='') as file:
       writer = csv.writer(file)
-      keys = []#[0] * rowNamesIndex
+      keys = []
       if isinstance(data, list):
         parsedData = data[0]
+      if rowNamesIndex != None:
+        keys = [0] * len(parsedData)
       for key, value in parsedData.items():
         if key in rowNames:
-          #keys[rowNamesIndex[key]] = rowNames[key]
-          keys.append(rowNames[key])
+          if rowNamesIndex != None:
+            print(key)
+            keys[rowNamesIndex[key]] = rowNames[key]
+          else:
+            keys.append(rowNames[key])
       fxy = len(keys)
       for index in range(fxy, self.maxRows):
         keys.append(" ")
@@ -101,9 +141,17 @@ class TestApp(tk.Frame):
       if isinstance(data, list):
         for each in data:
           values = []
+          if rowNamesIndex != None:
+            values = [0] * len(each)
           for key, value in each.items():
             if key in rowNames:
-              values.append(value)
+              cValue = value
+              if isfloat(value) or isInt(value):
+                cValue = toCommas(value)
+              if rowNamesIndex != None:
+                values[rowNamesIndex[key]] = cValue
+              else:
+                values.append(cValue)
           writer.writerow(values)
       else:
         values = []
@@ -260,7 +308,7 @@ class TestApp(tk.Frame):
     response.append(self.changeRules("pe", allCompanies, company))
     response.append(self.changeRules("vEBITBA", allCompanies, company))
     response.append(self.changeRules("evSales", allCompanies, company))
-    self.jsonToCsv(response, "temp/targetCompany.csv", self.maxRows, rowTargetCompany, 2)
+    self.jsonToCsv(response, "temp/targetCompany.csv", self.maxRows, rowTargetCompany, 2, rowTargetCompanyIndex)
 
   def combineDataIntoOnetable(self, tables):
     self.combine_files(tables[0], None, "temp/res.csv")
@@ -299,7 +347,7 @@ class TestApp(tk.Frame):
 
       jsonReponse = self.readJson("temp/multiData.json")
       self.createTargetCompany(jsonReponse, self.singleton)
-      self.jsonToCsv(jsonReponse, "temp/cmps.csv", self.maxRows, rowNames, 2)
+      self.jsonToCsv(jsonReponse, "temp/cmps.csv", self.maxRows, rowNames, 2, rowNamesIndex)
       self.createMedianAndAverageTable(jsonReponse)
       self.getApplicationHeader(self.singleton, jsonReponse)
 
