@@ -1,15 +1,15 @@
 {
-  "name": "Apple Inc.",
-  "volume": 4334335000,
-  "price": 289.07,
-  "sector": "Technology Sector",
-  "totalRevenue": 4.675,
-  "debt": 109507000000,
-  "netIncomeForCommonStakeholder": 11249000000,
-  "EBITDA": 16.779,
-  "marketCap": 1252926218450.0,
-  "companyValue": 1362433218450.0,
-  "evSales": 291429565443.8503,
-  "vEBITBA": 81198713776.14876,
-  "pe": 111.38111996177437
+  "name": "Alphabet Inc.",
+  "volume": 1297434,
+  "price": 2451.76,
+  "sector": "Communication Services Sector",
+  "totalRevenue": 196682000,
+  "debt": -1,
+  "netIncomeForCommonStakeholder": 51363000,
+  "EBITDA": 75140000,
+  "marketCap": 3180996783.84,
+  "companyValue": -1,
+  "evSales": -1,
+  "vEBITBA": -1,
+  "pe": 61.931678130950296
 }

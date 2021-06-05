@@ -87,34 +87,38 @@ class DataPath():
         allSectors.append(hrefName[0].string)
         self.sectorsMap[hrefName[0].string] = hrefName[0]["href"]
     return allSectors
-  def getCompaniesBySector(self, sector):
+
+  def tableDataText(self, table):
+    def rowgetDataText(tr, coltag='td'): # td (data) or th (header)
+        return [td.get_text(strip=True) for td in tr.find_all(coltag)]
+    rows = []
+    trs = table.find_all('tr')
+    headerow = rowgetDataText(trs[0], 'th')
+    if headerow: # if there is a header row include first
+        rows.append(headerow)
+        trs = trs[1:]
+    for tr in trs: # for every table row
+        rows.append(rowgetDataText(tr, 'td') ) # data row
+    return rows
+
+  def getCompaniesBySector2(self, sector, myCompany=None):
     self.getAllSectors()
     self.fetchFinanceData("getCompaniesBySector", sector=sector)
     companiesTicker = []
-    localCompanies = self.allCompaniesInSector.find_all("td", {"class": "text-left"})
-    # allTrs = self.allCompaniesInSector.find_all("tbody", {})
-    # for eachTrs in allTrs:
-    #   comps = eachTrs.find_all("tr", {})
-    #   for eachData in comps:
-    #     print(eachData)
-    #     exit()
-    for sector in localCompanies:
-      hrefName = sector.find_all("a", {})
-      if hrefName != None and len(hrefName) == 1:
-        companiesTicker.append(hrefName[0].string)
-    return companiesTicker
-  # def getCompaniesBySectorV2(self, sector):
+    localCompanies = self.allCompaniesInSector.find_all("tbody", {})
+    responseDepth = self.tableDataText(localCompanies[0])
+    response = []
+    for currentCompany in responseDepth:
+      if myCompany != currentCompany[1]:
+        response.append([currentCompany[1], float(currentCompany[4].replace(",", "")) * float(currentCompany[3].replace(",", ""))])
+    response.sort(key = lambda x: x[1], reverse=True)
+    return [key[0] for key in response]
+
+  # def getCompaniesBySector(self, sector):
   #   self.getAllSectors()
   #   self.fetchFinanceData("getCompaniesBySector", sector=sector)
   #   companiesTicker = []
   #   localCompanies = self.allCompaniesInSector.find_all("td", {"class": "text-left"})
-  #   allTrs = self.allCompaniesInSector.find_all("tbody", {})
-  #   for eachTrs in allTrs:
-  #     comps = eachTrs.find_all("tr", {})
-  #     for eachData in comps:
-  #       eachTrs.find_all("td", {})
-  #       print(eachTrs[0])
-  #       exit()
   #   for sector in localCompanies:
   #     hrefName = sector.find_all("a", {})
   #     if hrefName != None and len(hrefName) == 1:
@@ -140,7 +144,7 @@ class DataPath():
     return UNDEF_VALUE
   def getVolumeBySym(self, sym):
     self.fetchFinanceData("rapid", sym=sym)
-    if len(self.response["results"]) and "shares" in self.response["results"][0]:
+    if len(self.response["results"]) > 0 and "shares" in self.response["results"][0]:
       return self.response["results"][0]["shares"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
@@ -149,7 +153,7 @@ class DataPath():
     return UNDEF_VALUE
   def getPriceBySym(self, sym):
     self.fetchFinanceData("rapid", sym=sym)
-    if len(self.response["results"]) and "sharePriceAdjustedClose" in self.response["results"][0]:
+    if len(self.response["results"]) > 0 and "sharePriceAdjustedClose" in self.response["results"][0]:
       return self.response["results"][0]["sharePriceAdjustedClose"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
@@ -158,8 +162,8 @@ class DataPath():
     return UNDEF_VALUE
   def getTotalRevenueBySym(self, sym):
     self.fetchFinanceData("rapid", sym=sym)
-    if len(self.response["results"]) and "priceSales" in self.response["results"][0]:
-      return self.response["results"][0]["priceSales"]
+    if len(self.response["results"]) > 0 and "costOfRevenue" in self.response["results"][0]:
+      return self.response["results"][0]["costOfRevenue"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'sales' in financeInfo and financeInfo['sales'] != None:
@@ -187,21 +191,21 @@ class DataPath():
     return UNDEF_VALUE
 
   def getDebtBySym(self, sym):
+    self.fetchFinanceData("rapid", sym=sym)
+    if len(self.response["results"]) > 0 and "debtCurrent" in self.response["results"][0]:
+      return self.response["results"][0]["debtCurrent"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'debt' in financeInfo and financeInfo['debt'] != None:
       return financeInfo['debt']
+    return UNDEF_VALUE
     #self.fetchFinanceData("wsj", sym=sym)
     # value = self.getDebtByWsj()
     # if value != UNDEF_VALUE:
     #   return float(value) * self.getEBITDABySym(sym)
-    self.fetchFinanceData("rapid", sym=sym)
-    if len(self.response["results"]) and "debt" in self.response["results"][0]:
-      return self.response["results"][0]["debt"]
-    return UNDEF_VALUE
   def getEBITDABySym(self, sym):
     self.fetchFinanceData("rapid", sym=sym)
-    if len(self.response["results"]) and "enterpriseValueOverEBITDA" in self.response["results"][0]:
+    if len(self.response["results"]) > 0 and "enterpriseValueOverEBITDA" in self.response["results"][0]:
       return self.response["results"][0]["enterpriseValueOverEBITDA"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
@@ -214,7 +218,7 @@ class DataPath():
     return UNDEF_VALUE
   def getNetIncomeCommonStockBySym(self, sym):
     self.fetchFinanceData("rapid", sym=sym)
-    if len(self.response["results"]) and "netIncomeCommonStock" in self.response["results"][0]:
+    if len(self.response["results"]) > 0 and "netIncomeCommonStock" in self.response["results"][0]:
       return self.response["results"][0]["netIncomeCommonStock"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info

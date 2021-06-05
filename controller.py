@@ -35,16 +35,17 @@ def getCompanySector():
 
 def getCompaniesInSector(sector):
   response = {}
-  response['companies'] = dataPath.getCompaniesBySector(sector)
+  response['companies'] = dataPath.getCompaniesBySector2(sector)
   return response
 
 def getBestCompanies(sector):
   sectorCompanies = getCompaniesInSector(sector)
+  print(sectorCompanies)
   companies = []
   for index in range(5):
     companies.append(getCompanyDataByAbreviation(sectorCompanies['companies'][index]))
     print("Done querying ", sectorCompanies['companies'][index])
-    time.sleep(3.5)
+    time.sleep(5.5)
   return companies
 
 def getCompanyExtendedValues(name):
@@ -73,4 +74,5 @@ def getCompanyExtendedValues(name):
 #print(getCompanyExtendedValues("MLM"))
 #print(getAllSectors())
 #print(getBestCompanies('Industrials Sector'))
+#print(dataPath.getCompaniesBySector2('Industrials Sector'))
 #print(dataPath.getCompaniesBySectorV2("Technology Sector"))
