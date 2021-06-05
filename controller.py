@@ -33,14 +33,13 @@ def getCompanySector():
   response = {}
   return response
 
-def getCompaniesInSector(sector):
+def getCompaniesInSector(sector, name):
   response = {}
-  response['companies'] = dataPath.getCompaniesBySector2(sector)
+  response['companies'] = dataPath.getCompaniesBySector2(sector, myCompany=name)
   return response
 
-def getBestCompanies(sector):
-  sectorCompanies = getCompaniesInSector(sector)
-  print(sectorCompanies)
+def getBestCompanies(sector, name):
+  sectorCompanies = getCompaniesInSector(sector, name)
   companies = []
   for index in range(5):
     companies.append(getCompanyDataByAbreviation(sectorCompanies['companies'][index]))

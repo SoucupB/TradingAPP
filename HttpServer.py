@@ -28,10 +28,11 @@ class S(BaseHTTPRequestHandler):
         sectors = json.dumps(getAllSectors())
         self.wfile.write(sectors.encode('utf-8'))
         return
-      params = checkParam('/companies/:sector', self.path)
+      params = checkParam('/companies/:sector/:name', self.path)
       if params:
         sector = params[":sector"].replace("%20", " ")
-        companies = json.dumps(getBestCompanies(sector))
+        name = params[":name"].replace("%20", " ")
+        companies = json.dumps(getBestCompanies(sector, name))
         self.wfile.write(companies.encode('utf-8'))
         return
       params = checkParam('/company/:cmp', self.path)

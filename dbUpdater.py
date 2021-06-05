@@ -51,9 +51,9 @@ def getSectors():
 argument_lists = sys.argv
 print(argument_lists)
 if argument_lists[1] == "companies":
-  r = requests.get(f'http://localhost:8080/companies/{argument_lists[2]}')
+  r = requests.get(f'http://localhost:8080/companies/{argument_lists[2]}/{argument_lists[3]}')
   print("New request at", r.url, datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
-  writeJsonDataArray(json.loads(r.text), argument_lists[3])
+  writeJsonDataArray(json.loads(r.text), argument_lists[4])
 
 if argument_lists[1] == "company":
   r = requests.get(f'http://localhost:8080/company/{argument_lists[2]}')

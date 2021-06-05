@@ -29,14 +29,28 @@ rowNames = {
   "marketCap": "Market Cap",
   "totalRevenue": "Total Revenue",
   "debt": "Net debt",
-  "totalRevenue": "Total Revenue",
   "netIncomeForCommonStakeholder": "Net Income Common Stockholders",
   "evSales": "EV/Sales",
   "vEBITBA": "V/EBITBA",
   "pe": "P/E",
-  "price": "Prvious Close",
+  "price": "Previous Close",
   "companyValue": "Company Value",
   "targetPrice": "Pret tinta"
+}
+
+rowNamesIndex = {
+  "name": 0,
+  "volume": 2,
+  "marketCap": 3,
+  "totalRevenue": 6,
+  "debt": 4,
+  "netIncomeForCommonStakeholder": 8,
+  "evSales": 9,
+  "vEBITBA": 10,
+  "pe": 11,
+  "price": 1,
+  "companyValue": 5,
+  "targetPrice": 13
 }
 
 rowTargetCompany = {
@@ -49,9 +63,10 @@ rowTargetCompany = {
   "evSales": "EV/Sales",
   "vEBITBA": "V/EBITBA",
   "pe": "P/E",
-  "price": "Prvious Close",
+  "price": "Previous Close",
   "companyValue": "Company Value",
-  "targetPrice": "Pret tinta"
+  "targetPrice": "Pret tinta",
+  "name": "Company Name"
 }
 
 averageMedian = {
@@ -68,15 +83,16 @@ headerStructure = {
 }
 
 class TestApp(tk.Frame):
-  def jsonToCsv(self, data, csvName, maxRows, rowNames, spaces):
+  def jsonToCsv(self, data, csvName, maxRows, rowNames, spaces, rowNamesIndex=None):
     parsedData = data
     with open(csvName, 'w', newline='') as file:
       writer = csv.writer(file)
-      keys = []
+      keys = []#[0] * rowNamesIndex
       if isinstance(data, list):
         parsedData = data[0]
       for key, value in parsedData.items():
         if key in rowNames:
+          #keys[rowNamesIndex[key]] = rowNames[key]
           keys.append(rowNames[key])
       fxy = len(keys)
       for index in range(fxy, self.maxRows):
@@ -161,7 +177,7 @@ class TestApp(tk.Frame):
     self.timerIndividual()
     self.lastUsedVariable = e1.get()
   def searchBatch(self, stre):
-    self.procMulti = subprocess.Popen(f'python dbUpdater.py companies {stre} temp/multiData.json')
+    self.procMulti = subprocess.Popen(f'python dbUpdater.py companies {stre} {self.searchedValue} temp/multiData.json')
     self.pollMulti = self.procMulti.poll()
 
   def recomandations(self, randament, lastRandament):
@@ -201,7 +217,6 @@ class TestApp(tk.Frame):
       "Randament": " ",
       "Last Update": " ",
     })
-    print(newCompany["targetPrice"] / newCompany["price"] - 1, self.lastRandament, newCompany["targetPrice"] / newCompany["price"] - 1 - self.lastRandament)
     self.lastRandament = newCompany["targetPrice"] / newCompany["price"] - 1
     self.jsonToCsv(response, "temp/Corn.csv", self.maxRows, headerStructure, 2)
     return response

@@ -89,16 +89,16 @@ class DataPath():
     return allSectors
 
   def tableDataText(self, table):
-    def rowgetDataText(tr, coltag='td'): # td (data) or th (header)
+    def rowgetDataText(tr, coltag='td'):
         return [td.get_text(strip=True) for td in tr.find_all(coltag)]
     rows = []
     trs = table.find_all('tr')
     headerow = rowgetDataText(trs[0], 'th')
-    if headerow: # if there is a header row include first
+    if headerow:
         rows.append(headerow)
         trs = trs[1:]
-    for tr in trs: # for every table row
-        rows.append(rowgetDataText(tr, 'td') ) # data row
+    for tr in trs:
+        rows.append(rowgetDataText(tr, 'td') )
     return rows
 
   def getCompaniesBySector2(self, sector, myCompany=None):

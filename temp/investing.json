@@ -1,15 +1,15 @@
 {
-  "name": "Alphabet Inc.",
-  "volume": 1297434,
-  "price": 2451.76,
-  "sector": "Communication Services Sector",
-  "totalRevenue": 196682000,
-  "debt": -1,
-  "netIncomeForCommonStakeholder": 51363000,
-  "EBITDA": 75140000,
-  "marketCap": 3180996783.84,
-  "companyValue": -1,
-  "evSales": -1,
-  "vEBITBA": -1,
-  "pe": 61.931678130950296
+  "name": "3M Company",
+  "volume": 575196371,
+  "price": 153.65,
+  "sector": "Industrials Sector",
+  "totalRevenue": 4109000000,
+  "debt": 3492000000,
+  "netIncomeForCommonStakeholder": 1292000000,
+  "EBITDA": 13.713,
+  "marketCap": 88378922404.15001,
+  "companyValue": 91870922404.15001,
+  "evSales": 22.358462497967878,
+  "vEBITBA": 6699549508.068987,
+  "pe": 68.40473870290248
 }
