@@ -162,8 +162,8 @@ class DataPath():
     return UNDEF_VALUE
   def getTotalRevenueBySym(self, sym):
     self.fetchFinanceData("rapid", sym=sym)
-    if len(self.response["results"]) > 0 and "costOfRevenue" in self.response["results"][0]:
-      return self.response["results"][0]["costOfRevenue"]
+    if len(self.response["results"]) > 0 and "revenues" in self.response["results"][0]:
+      return self.response["results"][0]["revenues"]
     self.fetchFinanceData("yfinance", sym)
     financeInfo = self.yfinance.info
     if 'sales' in financeInfo and financeInfo['sales'] != None:

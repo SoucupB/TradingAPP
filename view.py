@@ -13,6 +13,7 @@ import time
 from datetime import datetime
 from tkinter import ttk
 import locale
+import statistics
 locale.setlocale(locale.LC_ALL, '')
 
 filepath = 'temp/investing.csv'
@@ -280,9 +281,11 @@ class TestApp(tk.Frame):
       total += companies[i][by]
     return total / len(companies)
   def getMedianBy(self, companies, by, currentCompany):
-    medianValue = self.getMedianValue(companies, by)
+    values = []
+    for i in range(len(companies)):
+      values.append(companies[i][by])
     currentCompanyCopy = copy.deepcopy(currentCompany)
-    currentCompanyCopy[by] = medianValue
+    currentCompanyCopy[by] = statistics.median(values)
     return currentCompanyCopy
   def changeRules(self, by, allCompanies, company):
     cCompany = None
@@ -290,17 +293,17 @@ class TestApp(tk.Frame):
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["netIncomeForCommonStakeholder"] * cCompany[by]
       cCompany["marketCap"] = cCompany["companyValue"] + cCompany["debt"]
-      cCompany["targetPrice"] = cCompany["volume"] / cCompany["companyValue"]
+      cCompany["targetPrice"] = cCompany["companyValue"] / cCompany["volume"]
     if by == "vEBITBA":
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["EBITDA"] * cCompany[by]
       cCompany["marketCap"] = cCompany["companyValue"] - cCompany["debt"]
-      cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
+      cCompany["targetPrice"] = cCompany["marketCap"] / cCompany["volume"]
     if by == "evSales":
       cCompany = self.getMedianBy(allCompanies, by, company)
       cCompany["companyValue"] = cCompany["totalRevenue"] * cCompany[by]
       cCompany["marketCap"] = cCompany["companyValue"] - cCompany["debt"]
-      cCompany["targetPrice"] = cCompany["volume"] / cCompany["marketCap"]
+      cCompany["targetPrice"] = cCompany["marketCap"] / cCompany["volume"]
     return cCompany
 
   def createTargetCompany(self, allCompanies, company):
