@@ -116,7 +116,8 @@ def isInt(value):
     return False
 
 def toCommas(value):
-  return f'{value:n}'
+  vll = f'{value:n}'
+  return "{:,}".format(value)
 
 class TestApp(tk.Frame):
   def jsonToCsv(self, data, csvName, maxRows, rowNames, spaces, rowNamesIndex=None):
@@ -148,7 +149,7 @@ class TestApp(tk.Frame):
             if key in rowNames:
               cValue = value
               if isfloat(value) or isInt(value):
-                cValue = toCommas(value)
+                cValue = str(toCommas(value))
               if rowNamesIndex != None:
                 values[rowNamesIndex[key]] = cValue
               else:
